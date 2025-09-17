@@ -1,0 +1,480 @@
+{% extends "products/base.html" %}
+
+{% block title %}Руководство по эксплуатации CRM System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .guide-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .guide-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+
+    .guide-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .guide-card .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #edf2f9;
+        padding: 20px;
+        font-weight: 600;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        margin-right: 10px;
+    }
+
+    .nav-guide {
+        position: sticky;
+        top: 100px;
+    }
+
+    .nav-guide .nav-link {
+        color: #495057;
+        padding: 10px 15px;
+        border-left: 3px solid transparent;
+        border-radius: 0;
+    }
+
+    .nav-guide .nav-link:hover,
+    .nav-guide .nav-link.active {
+        border-left-color: var(--primary-color);
+        background-color: #eaf2ff;
+        color: var(--primary-color);
+    }
+
+    .feature-icon {
+        font-size: 24px;
+        margin-bottom: 15px;
+        display: inline-block;
+        padding: 15px;
+        border-radius: 10px;
+        background-color: rgba(59, 125, 221, 0.1);
+        color: var(--primary-color);
+    }
+
+    .keyboard-shortcut {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Руководство по эксплуатации</h1>
+        <button class="btn btn-outline-primary" onclick="window.print()">
+            <i class="bi bi-printer me-2"></i>Версия для печати
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Навигация по руководству -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="card nav-guide">
+                <div class="card-body">
+                    <h5 class="card-title">Содержание</h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#section-intro">Введение</a>
+                        <a class="nav-link" href="#section-categories">Категории</a>
+                        <a class="nav-link" href="#section-suppliers">Поставщики</a>
+                        <a class="nav-link" href="#section-products">Управление товарами</a>
+                        <a class="nav-link" href="#section-warehouse">Управление складом</a>
+                        <a class="nav-link" href="#section-sales">Продажи</a>
+                        <a class="nav-link" href="#section-analytics">Аналитика</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основное содержание -->
+        <div class="col-lg-9">
+            <!-- Введение -->
+            <div id="section-intro" class="guide-section">
+                <h2 class="mb-4">Введение в CRM System</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card guide-card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-info-circle feature-icon"></i>
+                                <h5 class="card-title">О системе</h5>
+                                <p class="card-text">CRM System — это система управления строительным инвентарем, предназначенная для учета товаров, управления складом, регистрации продаж и работы с поставщиками.</p>
+                                
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <strong>Важно:</strong> Следуйте порядку разделов для правильной настройки системы!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card guide-card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-lightning-charge feature-icon"></i>
+                                <h5 class="card-title">Основные возможности</h5>
+                                <h6 class="text-start mb-3">Правильный порядок работы:</h6>
+                                <ol class="text-start">
+                                    <li><strong>Категории</strong> — создайте категории товаров</li>
+                                    <li><strong>Поставщики</strong> — добавьте поставщиков</li>
+                                    <li><strong>Товары</strong> — создайте товары</li>
+                                    <li><strong>Склад</strong> — добавьте партии товаров</li>
+                                    <li><strong>Продажи</strong> — регистрируйте продажи</li>
+                                    <li><strong>Аналитика</strong> — анализируйте результаты</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Категории -->
+            <div id="section-categories" class="guide-section">
+                <h2 class="mb-4">Категории</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Управление категориями</div>
+                    <div class="card-body">
+                        <p>Раздел "Категории" позволяет создавать и управлять категориями товаров для лучшей организации ассортимента.</p>
+
+                        <h5 class="mt-4">Порядок действий:</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">1</span>
+                            <div>
+                                <strong>Создание категории</strong> — нажмите кнопку <button class="btn btn-success btn-sm"><i class="bi bi-plus me-1"></i>Добавить категорию</button>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">2</span>
+                            <div>
+                                <strong>Заполнение формы</strong> — введите название категории (например: "Инструменты", "Материалы", "Оборудование")
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">3</span>
+                            <div>
+                                <strong>Сохранение</strong> — нажмите <button class="btn btn-primary btn-sm">Сохранить</button> для создания категории
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Основные функции:</h5>
+                        <ul>
+                            <li>Создание новых категорий</li>
+                            <li>Редактирование названий категорий</li>
+                            <li>Удаление категорий</li>
+                            <li>Назначение товаров к категориям</li>
+                        </ul>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Важно:</strong> Создайте категории перед добавлением товаров. Это поможет лучше организовать ассортимент.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Поставщики -->
+            <div id="section-suppliers" class="guide-section">
+                <h2 class="mb-4">Поставщики</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Управление поставщиками</div>
+                    <div class="card-body">
+                        <p>Раздел "Поставщики" позволяет управлять информацией о поставщиках товаров.</p>
+
+                        <h5 class="mt-4">Порядок действий:</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">1</span>
+                            <div>
+                                <strong>Добавление поставщика</strong> — нажмите кнопку <button class="btn btn-success btn-sm"><i class="bi bi-plus me-1"></i>Добавить поставщика</button>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">2</span>
+                            <div>
+                                <strong>Заполнение формы</strong> — введите данные поставщика:
+                                <ul class="mt-2">
+                                    <li>Название компании</li>
+                                    <li>Имя контактного лица</li>
+                                    <li>Телефон</li>
+                                    <li>Email</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">3</span>
+                            <div>
+                                <strong>Сохранение</strong> — нажмите <button class="btn btn-primary btn-sm">Добавить поставщика</button>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Основные функции:</h5>
+                        <ul>
+                            <li>Добавление новых поставщиков</li>
+                            <li>Редактирование контактной информации</li>
+                            <li>Удаление поставщиков</li>
+                            <li>Поиск поставщиков по названию</li>
+                        </ul>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Важно:</strong> Создайте поставщиков перед добавлением товаров. Каждый товар должен быть привязан к поставщику.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Управление товарами -->
+            <div id="section-products" class="guide-section">
+                <h2 class="mb-4">Управление товарами</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Работа с товарами</div>
+                    <div class="card-body">
+                        <p>В разделе "Товары" вы можете управлять всем ассортиментом, добавлять новые товары, редактировать существующие и назначать категории.</p>
+
+                        <h5 class="mt-4">Порядок действий:</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">1</span>
+                            <div>
+                                <strong>Добавление товара</strong> — нажмите кнопку <button class="btn btn-success btn-sm"><i class="bi bi-plus me-1"></i>Добавить продукт</button>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">2</span>
+                            <div>
+                                <strong>Заполнение формы</strong> — введите данные товара:
+                                <ul class="mt-2">
+                                    <li>Название товара</li>
+                                    <li>Выберите категорию (созданную ранее)</li>
+                                    <li>Выберите поставщика (созданного ранее)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">3</span>
+                            <div>
+                                <strong>Сохранение</strong> — нажмите <button class="btn btn-primary btn-sm">Добавить продукт</button>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Основные функции:</h5>
+                        <ul>
+                            <li>Добавление новых товаров</li>
+                            <li>Редактирование информации о товарах</li>
+                            <li>Назначение товаров категориям</li>
+                            <li>Привязка товаров к поставщикам</li>
+                            <li>Просмотр общей информации о товарах</li>
+                        </ul>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Важно:</strong> После создания товара можно добавлять партии на склад. Цены устанавливаются при создании партий.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Управление складом -->
+            <div id="section-warehouse" class="guide-section">
+                <h2 class="mb-4">Управление складом</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Работа со складом</div>
+                    <div class="card-body">
+                        <p>Раздел "Склад" отображает товары с остатками, сгруппированные по поставщикам. Здесь можно управлять партиями товаров и отслеживать остатки.</p>
+
+                        <h5 class="mt-4">Порядок действий:</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">1</span>
+                            <div>
+                                <strong>Добавление поставки</strong> — нажмите кнопку <button class="btn btn-success btn-sm"><i class="bi bi-plus me-1"></i>Провести новую поставку</button>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">2</span>
+                            <div>
+                                <strong>Выбор товара</strong> — выберите товар из списка (созданный ранее)
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">3</span>
+                            <div>
+                                <strong>Указание данных</strong> — введите цену и количество товара
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">4</span>
+                            <div>
+                                <strong>Сохранение</strong> — нажмите <button class="btn btn-primary btn-sm">Создать поставку</button> - система автоматически создаст группу партий
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Основные операции:</h5>
+                        <ul>
+                            <li><strong>Просмотр товаров</strong> — товары сгруппированы по поставщикам с фильтрами</li>
+                            <li><strong>Экспорт данных</strong> — кнопка "Экспорт в XML" для выгрузки данных</li>
+                            <li><strong>Управление партиями</strong> — объединение, изменение, удаление партий</li>
+                        </ul>
+
+                        <h5 class="mt-4">Особенности работы с партиями:</h5>
+                        <ul>
+                            <li><strong>Группы партий</strong> — каждая поставка создает новую группу партий</li>
+                            <li><strong>Объединение партий</strong> — можно объединить несколько партий одного товара</li>
+                            <li><strong>Изменение партии</strong> — создает новую партию с новыми данными</li>
+                            <li><strong>Автоматическое списание</strong> — при продаже количество списывается с партий</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-sales" class="guide-section">
+                <h2 class="mb-4">Продажи</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Регистрация продаж</div>
+                    <div class="card-body">
+                        <p>Раздел "Продажи" предназначен для регистрации продаж товаров с автоматическим списанием со склада.</p>
+
+                        <h5 class="mt-4">Порядок действий:</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">1</span>
+                            <div>
+                                <strong>Создание продажи</strong> — нажмите кнопку <button class="btn btn-success btn-sm"><i class="bi bi-plus me-1"></i>Создать продажу</button>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">2</span>
+                            <div>
+                                <strong>Выбор партии</strong> — выберите партию товара из списка доступных (только партии с остатками)
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">3</span>
+                            <div>
+                                <strong>Указание количества</strong> — введите количество для продажи (не больше остатка в партии)
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">4</span>
+                            <div>
+                                <strong>Указание даты</strong> — выберите дату и время продажи
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="step-number">5</span>
+                            <div>
+                                <strong>Сохранение</strong> — нажмите <button class="btn btn-primary btn-sm">Сохранить</button> - система автоматически спишет количество с партии
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Особенности системы продаж:</h5>
+                        <ul>
+                            <li><strong>Автоматическое списание</strong> — при сохранении продажи количество автоматически списывается с выбранной партии</li>
+                            <li><strong>Валидация остатков</strong> — система проверяет наличие достаточного количества товара</li>
+                            <li><strong>Отслеживание выручки</strong> — все продажи учитываются для аналитики</li>
+                            <li><strong>Фильтрация продаж</strong> — можно фильтровать по дате и названию товара</li>
+                        </ul>
+
+                        <h5 class="mt-4">Просмотр продаж:</h5>
+                        <p>В списке продаж отображается информация о каждой продаже: товар, количество, цена, дата продажи и общая стоимость.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="section-analytics" class="guide-section">
+                <h2 class="mb-4">Аналитика</h2>
+                <div class="card guide-card">
+                    <div class="card-header">Анализ продаж</div>
+                    <div class="card-body">
+                        <p>Раздел "Аналитика" предоставляет детальную информацию о продажах с графиками и статистикой.</p>
+
+                        <h5>Основные возможности:</h5>
+                        <ul>
+                            <li><strong>График выручки по дням</strong> — линейный график с цветовой индикацией</li>
+                            <li><strong>Цветовая индикация</strong> — зеленый (выше среднего), красный (ниже среднего)</li>
+                            <li><strong>Дни недели</strong> — отображение дней недели под датами</li>
+                            <li><strong>Фильтрация по периоду</strong> — выбор года и месяца</li>
+                            <li><strong>Статистика</strong> — общее количество товаров, остатки, выручка</li>
+                        </ul>
+
+                        <h5 class="mt-4">Как использовать аналитику:</h5>
+                        <ol>
+                            <li>Выберите год и месяц в фильтрах</li>
+                            <li>Изучите график выручки по дням</li>
+                            <li>Обратите внимание на цветовую индикацию</li>
+                            <li>Проанализируйте статистические показатели</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Плавная прокрутка к разделам
+    document.querySelectorAll('.nav-guide .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+
+            // Обновляем активную ссылку
+            document.querySelectorAll('.nav-guide .nav-link').forEach(item => {
+                item.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Прокручиваем к элементу
+            window.scrollTo({
+                top: targetElement.offsetTop - 20,
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Обновление активной ссылки при прокрутке
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.guide-section');
+        const navLinks = document.querySelectorAll('.nav-guide .nav-link');
+
+        let currentSection = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                currentSection = '#' + section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

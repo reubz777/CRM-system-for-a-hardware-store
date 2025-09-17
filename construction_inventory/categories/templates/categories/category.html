@@ -1,0 +1,130 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Управление категориями</h1>
+    <a href="{% url 'categories:create-category' %}" class="btn btn-primary d-flex align-items-center">
+        <i class="bi bi-plus-circle me-2"></i> Добавить категорию
+    </a>
+</div>
+
+<!-- Карточки статистики -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stats-card">
+            <i class="bi bi-list-ul" style="background-color: rgba(59, 125, 221, 0.1); color: #3b7ddd;"></i>
+            <h2>{{ total_categories }}</h2>
+            <p>Всего категорий</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card">
+            <i class="bi bi-box" style="background-color: rgba(28, 187, 140, 0.1); color: #1cbb8c;"></i>
+            <h2>{{ total_products_in_categories }}</h2>
+            <p>Товаров в категориях</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card">
+            <i class="bi bi-layers" style="background-color: rgba(247, 184, 75, 0.1); color: #f7b84b;"></i>
+            <h2>{{ total_active_categories }}</h2>
+            <p>Активных категорий</p>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры и поиск -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="search-name" class="form-label">Поиск по названию</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="search-name" name="search_name"
+                           placeholder="Введите название категории"
+                           value="{{ request.GET.search_name }}">
+                </div>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-filter me-1"></i>Применить
+                </button>
+                <a href="{% url 'categories:category-list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Сбросить
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Таблица категорий -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Список категорий</h5>
+        <span class="badge bg-primary">Всего: {{ categories|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50%">Название категории</th>
+                        <th style="width: 20%">Количество товаров</th>
+                        <th style="width: 20%">Статус</th>
+                        <th style="width: 10%">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if categories %}
+                        {% for category in categories %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded p-2 me-3">
+                                        <i class="bi bi-folder-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ category.name }}</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ category.product_count }} товаров</span>
+                            </td>
+                            <td>
+                                {% if category.product_count > 0 %}
+                                    <span class="badge bg-success">Активна</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Неактивна</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-nowrap gap-1">
+                                    <a href="{% url 'categories:edit-category' pk=category.id %}" class="btn btn-primary btn-sm" title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'categories:delete-category' pk=category.id %}" class="btn btn-danger btn-sm" title="Удалить">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
+                            Категории не найдены
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Пагинация -->
+
+{% endblock %}

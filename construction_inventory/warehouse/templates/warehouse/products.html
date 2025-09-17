@@ -1,0 +1,280 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Управление товарами</h1>
+    <div>
+        <a href="{% url 'warehouse:export-xml' %}" class="btn btn-outline-success">
+            <i class="bi bi-download me-2"></i>Экспорт в XML
+        </a>
+        <a href="{% url 'warehouse:create-batch' %}" class="btn btn-info">
+            <i class="bi bi-truck me-2"></i>Добавить поставку
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="" id="filter-form">
+            <div class="row">
+                <!-- Поиск по названию товара -->
+                <div class="col-md-3 mb-3">
+                    <label for="search-name" class="form-label">Поиск по товару</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="search-name" name="search_name"
+                               placeholder="Введите название товара"
+                               value="{{ request.GET.search_name }}">
+                    </div>
+                </div>
+
+                <!-- Выбор категории -->
+                <div class="col-md-3 mb-3">
+                    <label for="category" class="form-label">Категория</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}"
+                                {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Выбор поставщика -->
+                <div class="col-md-3 mb-3">
+                    <label for="supplier" class="form-label">Поставщик</label>
+                    <select class="form-select" id="supplier" name="supplier">
+                        <option value="">Все поставщики</option>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.id }}"
+                                {% if request.GET.supplier == supplier.id|stringformat:"s" %}selected{% endif %}>
+                            {{ supplier.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="col-md-3 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-filter me-1"></i>Применить
+                    </button>
+                    <a href="{% url 'warehouse:batch-list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Список поставщиков и товаров</h5>
+        <span class="badge bg-primary">Найдено: {{ suppliers_list|length }} поставщиков</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 30%">Поставщик / Товар</th>
+                        <th style="width: 15%">Категория</th>
+                        <th style="width: 15%">Количество</th>
+                        <th style="width: 15%">Цена</th>
+                        <th style="width: 15%">Дата поставки</th>
+                        <th style="width: 10%">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if suppliers_list %}
+                        {% for supplier_data in suppliers_list %}
+                            <!-- Заголовок поставщика -->
+                            <tr class="supplier-row bg-light">
+                                <td colspan="6">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-building me-2"></i>
+                                            <strong>{{ supplier_data.supplier_name }}</strong>
+                                            <span class="badge bg-secondary ms-2">{{ supplier_data.products|length }} товаров</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary toggle-supplier" data-supplier="{{ supplier_data.supplier.id|default:'no_supplier' }}">
+                                            <i class="bi bi-chevron-up"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {% for product_info in supplier_data.products %}
+                                <!-- Строка товара -->
+                                <tr class="product-row" data-supplier="{{ supplier_data.supplier.id|default:'no_supplier' }}">
+                                    <td class="ps-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-box me-2"></i>
+                                                <span>{{ product_info.product.name }}</span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-secondary toggle-product" data-product="{{ product_info.product.id }}">
+                                                <i class="bi bi-chevron-up"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if product_info.product.category %}
+                                            {{ product_info.product.category.name }}
+                                        {% else %}
+                                            <span class="text-muted">Без категории</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ product_info.total_quantity }} шт.
+                                    </td>
+                                    <td>
+                                        {{ product_info.last_batch.price }} BYN
+                                    </td>
+                                    <td>
+                                        {{ product_info.last_batch.arrival_date|date:"d.m.Y" }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-nowrap gap-1">
+                                            <!-- Кнопка переоценки -->
+                                            <form action="{% url 'warehouse:consolidation-batch' pk=product_info.product.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-warning btn-sm" title="Переоценка">
+                                                    <i class="bi bi-diagram-3"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Кнопка информации о товаре -->
+                                            <a href="{% url 'products:product-detail' pk=product_info.product.id %}" class="btn btn-info btn-sm" title="Информация о товаре">
+                                                <i class="bi bi-card-text"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Детали поставок -->
+                                {% for batch in product_info.batches %}
+                                    {% if batch.quantity > 0 %}
+                                    <tr class="batch-row" data-product="{{ product_info.product.id }}" data-supplier="{{ supplier_data.supplier.id|default:'no_supplier' }}">
+                                        <td class="ps-5">
+                                            <i class="bi bi-truck me-2"></i>
+                                            Группа #{{ batch.group.id }}
+                                            {% if batch.is_modified %}
+                                                <span class="text-warning">(Изменено: {{ batch.arrival_date|date:"d.m.Y" }})</span>
+                                            {% endif %}
+                                        </td>
+                                        <td></td>
+                                        <td>{{ batch.quantity }} шт.</td>
+                                        <td>{{ batch.price }} BYN</td>
+                                        <td>{{ batch.arrival_date|date:"d.m.Y" }}</td>
+                                        <td>
+                                            <div class="d-flex flex-nowrap gap-1">
+                                                <a href="{% url 'warehouse:edit-batch' batch.id %}" class="btn btn-primary btn-sm" title="Редактировать">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="{% url 'warehouse:delete-batch' batch.id %}" class="btn btn-danger btn-sm" title="Удалить">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% endfor %}
+
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Товары не найдены
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Функция для открытия/закрытия всех товаров поставщика
+    function toggleSupplierProducts(supplierId, show) {
+        const productRows = document.querySelectorAll(`.product-row[data-supplier="${supplierId}"]`);
+        const batchRows = document.querySelectorAll(`.batch-row[data-supplier="${supplierId}"]`);
+        const icon = document.querySelector(`.toggle-supplier[data-supplier="${supplierId}"] i`);
+
+        const display = show ? 'table-row' : 'none';
+        const iconClass = show ? 'bi-chevron-up' : 'bi-chevron-down';
+        const oppositeIconClass = show ? 'bi-chevron-down' : 'bi-chevron-up';
+
+        productRows.forEach(row => row.style.display = display);
+        batchRows.forEach(row => row.style.display = display);
+        icon.classList.remove(oppositeIconClass);
+        icon.classList.add(iconClass);
+    }
+
+    // Функция для открытия/закрытия поставок товара
+    function toggleProductBatches(productId, show) {
+        const batchRows = document.querySelectorAll(`.batch-row[data-product="${productId}"]`);
+        const icon = document.querySelector(`.toggle-product[data-product="${productId}"] i`);
+
+        const display = show ? 'table-row' : 'none';
+        const iconClass = show ? 'bi-chevron-up' : 'bi-chevron-down';
+        const oppositeIconClass = show ? 'bi-chevron-down' : 'bi-chevron-up';
+
+        batchRows.forEach(row => row.style.display = display);
+        icon.classList.remove(oppositeIconClass);
+        icon.classList.add(iconClass);
+    }
+
+    // Автоматически открываем все при загрузке страницы
+    function openAllSections() {
+        // Открываем все товары и поставки у всех поставщиков
+        document.querySelectorAll('.supplier-row').forEach(supplierRow => {
+            const supplierId = supplierRow.querySelector('.toggle-supplier').getAttribute('data-supplier');
+            toggleSupplierProducts(supplierId, true);
+        });
+    }
+
+    // Обработчики для раскрытия/закрытия товаров поставщика
+    document.querySelectorAll('.toggle-supplier').forEach(button => {
+        button.addEventListener('click', function() {
+            const supplierId = this.getAttribute('data-supplier');
+            const productRows = document.querySelectorAll(`.product-row[data-supplier="${supplierId}"]`);
+            const isCurrentlyVisible = productRows[0]?.style.display !== 'none';
+            toggleSupplierProducts(supplierId, !isCurrentlyVisible);
+        });
+    });
+
+    // Обработчики для раскрытия/закрытия поставок товара
+    document.querySelectorAll('.toggle-product').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product');
+            const batchRows = document.querySelectorAll(`.batch-row[data-product="${productId}"]`);
+            const isCurrentlyVisible = batchRows[0]?.style.display !== 'none';
+            toggleProductBatches(productId, !isCurrentlyVisible);
+        });
+    });
+
+    // Открываем все секции при загрузке страницы
+    openAllSections();
+
+    // Автосабмит формы при изменении селектов
+    document.getElementById('category').addEventListener('change', function() {
+        document.getElementById('filter-form').submit();
+    });
+
+    document.getElementById('supplier').addEventListener('change', function() {
+        document.getElementById('filter-form').submit();
+    });
+});
+</script>
+{% endblock %}

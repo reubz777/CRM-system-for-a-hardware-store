@@ -1,0 +1,162 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Стили остаются без изменений */
+    .modal-background { /* ... */ }
+    .modal-container { /* ... */ }
+    /* ... остальные стили ... */
+
+    .alert-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .error-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+
+    .sales-list {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .sale-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sale-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="modal-background">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {% if error %}Ошибка удаления{% else %}Подтверждение удаления{% endif %}
+                </h5>
+                <button type="button" class="btn-close" onclick="window.history.back()"></button>
+            </div>
+
+            <form method="post" id="deleteForm">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    {% if error %}
+                    <!-- Блок ошибки -->
+                    <div class="alert-danger">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-x-circle-fill error-icon"></i>
+                            <strong>Ошибка удаления!</strong>
+                        </div>
+                        <p class="mb-3">{{ error }}</p>
+
+                        <div class="sales-list">
+                            <small><strong>Связанные продажи:</strong></small>
+                            {% for sale in protected_objects|slice:":3" %}
+                            <div class="sale-item">
+                                <small>
+                                    <i class="bi bi-cart-check me-1"></i>
+                                    Продажа #{{ sale.id }} от {{ sale.date|date:"d.m.Y" }} -
+                                    {{ sale.product.name }} ({{ sale.quantity }} шт.)
+                                </small>
+                            </div>
+                            {% endfor %}
+                            {% if protected_objects|length > 3 %}
+                            <div class="sale-item">
+                                <small><em>... и еще {{ protected_objects|length|add:"-3" }} продаж</em></small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary" onclick="window.history.back()">
+                            <i class="bi bi-arrow-left me-1"></i>Вернуться к списку
+                        </button>
+                    </div>
+
+                    {% else %}
+
+                    <p class="confirmation-text">
+                        Вы уверены, что хотите удалить {{ info }}?
+                    </p>
+
+                    <div class="batch-details">
+                        <div class="batch-info"> </div>
+                        {% if batch.products_count %}
+                        <div class="batch-info"><strong>Товаров в поставке:</strong> {{ batch.products_count }}</div>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-muted">
+                        <small>Это действие нельзя отменить. Все связанные данные будут удалены.</small>
+                    </p>
+                    {% endif %}
+                </div>
+
+                {% if not error %}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="bi bi-x-circle me-1"></i>Отмена
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="deleteBtn">
+                        <i class="bi bi-trash me-1"></i>Удалить
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+// Обработчик отправки формы (только если нет ошибки)
+{% if not error %}
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    const deleteBtn = document.getElementById('deleteBtn');
+    deleteBtn.classList.add('loading');
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i>Удаление...';
+});
+{% endif %}
+
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        window.history.back();
+    }
+});
+
+// Закрытие по клику вне модального окна
+document.querySelector('.modal-background').addEventListener('click', function(e) {
+    if (e.target === this) {
+        window.history.back();
+    }
+});
+</script>
+{% endblock %}

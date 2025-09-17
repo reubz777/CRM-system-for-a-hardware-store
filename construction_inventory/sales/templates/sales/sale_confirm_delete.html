@@ -1,0 +1,26 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal-background" id="deleteModalBackground" style="display: none; min-height: 100vh; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" onclick="closeDeleteModal()"></button>
+            </div>
+            <form method="post" action="#" id="deleteForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Вы действительно хотите удалить товар <strong id="productNameToDelete"></strong>?</p>
+                    <p class="text-danger">Это действие нельзя отменить.</p>
+                    <input type="hidden" name="product_id" id="productIdInput">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Отмена</button>
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

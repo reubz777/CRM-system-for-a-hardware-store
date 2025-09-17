@@ -1,0 +1,211 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- График -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                Аналитика продаж за 0{{ selected_month }}.{{ selected_year }}
+            </h5>
+            
+            <!-- Фильтры -->
+            <form method="get" class="d-flex gap-2 align-items-end">
+                <div>
+                    <label class="form-label small">Год</label>
+                    <select name="year" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 80px;">
+                        {% for year in years %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label small">Месяц</label>
+                    <select name="month" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 120px;">
+                        {% for month_num, month_name in months.items %}
+                            <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                                {{ month_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="text-center">
+                <canvas id="analyticsChart" width="800" height="500"></canvas>
+            </div>
+            
+            <!-- Легенда цветов -->
+            <div class="mt-3 d-flex justify-content-center gap-4">
+                <div class="d-flex align-items-center">
+                    <div class="color-indicator" style="width: 20px; height: 20px; background-color: rgba(40, 167, 69, 0.8); border-radius: 50%; margin-right: 8px;"></div>
+                    <span class="small">Выше среднего</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="color-indicator" style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.8); border-radius: 50%; margin-right: 8px;"></div>
+                    <span class="small">Ниже среднего</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="color-indicator" style="width: 20px; height: 20px; background-color: rgba(108, 117, 125, 0.8); border-radius: 50%; margin-right: 8px;"></div>
+                    <span class="small">Равно среднему</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h2>{{ stats.total_sales }}</h2>
+                    <p>Продаж за период</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h2> {{ avg_profit }}BYN</h2>
+                    <p>Средняя выручка в день</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h2>{{ stats.total_revenue }} BYN</h2>
+                    <p>Общая выручка</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h2>{{ profit_percentage }}%</h2>
+                    <p>Рост продаж</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Выручка по дням (BYN)',
+                data: {{ chart_values|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: {{ chart_colors|safe }},
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: {{ chart_colors|safe }},
+                pointHoverBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                segment: {
+                    borderColor: function(ctx) {
+                        const colors = {{ chart_colors|safe }};
+                        return colors[ctx.p0DataIndex] || 'rgb(75, 192, 192)';
+                    }
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Динамика выручки по дням месяца (Средняя: {{ avg_daily_revenue|floatformat:2 }} BYN)`,
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: function(context) {
+                        const max = Math.max(...{{ chart_values|safe }});
+                        return max * 1.2; // Добавляем 20% запаса сверху
+                    },
+                    title: {
+                        display: true,
+                        text: 'Выручка (BYN)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Дни месяца'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stats-card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.stats-card h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #2c3e50;
+}
+.stats-card p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 0.9rem;
+}
+#analyticsChart {
+    max-height: 600px;
+    min-height: 500px;
+}
+
+/* Стили для компактных фильтров */
+.card-header .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-header .form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+</style>
+{% endblock %}

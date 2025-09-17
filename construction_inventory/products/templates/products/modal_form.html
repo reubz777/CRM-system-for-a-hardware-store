@@ -1,0 +1,628 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .modal-background {
+        backdrop-filter: blur(8px);
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .modal-container {
+        max-width: 500px;
+        width: 100%;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    /* ЦВЕТОВЫЕ ТЕМЫ */
+    /* Синяя тема (по умолчанию) */
+    .theme-blue .modal-header {
+        background: linear-gradient(135deg, #3b7ddd 0%, #2c6ac8 100%);
+    }
+
+    .theme-blue .btn-primary {
+        background: linear-gradient(135deg, #3b7ddd 0%, #2c6ac8 100%);
+    }
+
+    .theme-blue .btn-primary:hover {
+        box-shadow: 0 4px 15px rgba(59, 125, 221, 0.4);
+    }
+
+    .theme-blue .modal-body input:focus,
+    .theme-blue .modal-body select:focus,
+    .theme-blue .modal-body textarea:focus {
+        border-color: #3b7ddd;
+        box-shadow: 0 0 0 0.2rem rgba(59, 125, 221, 0.25);
+    }
+
+    .theme-blue .product-option.selected {
+        background-color: #e3f2fd;
+        border-left: 4px solid #3b7ddd;
+    }
+
+    .theme-blue .product-info {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 1px solid #90caf9;
+    }
+
+    /* Красная тема */
+    .theme-red .modal-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .theme-red .btn-primary {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .theme-red .btn-primary:hover {
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .theme-red .modal-body input:focus,
+    .theme-red .modal-body select:focus,
+    .theme-red .modal-body textarea:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .theme-red .product-option.selected {
+        background-color: #fde8e8;
+        border-left: 4px solid #dc3545;
+    }
+
+    .theme-red .product-info {
+        background: linear-gradient(135deg, #fde8e8 0%, #fbd5d5 100%);
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Зеленая тема */
+    .theme-green .modal-header {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    }
+
+    .theme-green .btn-primary {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    }
+
+    .theme-green .btn-primary:hover {
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .theme-green .modal-body input:focus,
+    .theme-green .modal-body select:focus,
+    .theme-green .modal-body textarea:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .theme-green .product-option.selected {
+        background-color: #e8f5e8;
+        border-left: 4px solid #28a745;
+    }
+
+    .theme-green .product-info {
+        background: linear-gradient(135deg, #e8f5e8 0%, #d5f0d5 100%);
+        border: 1px solid #c3e6cb;
+    }
+
+    /* ОБЩИЕ СТИЛИ */
+    .modal-header {
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1.5rem;
+        border-bottom: none;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 1.4rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #edf2f9;
+        padding: 1.5rem 2rem;
+        background-color: #f8f9fa;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .modal-body p {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-body label {
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .modal-body input,
+    .modal-body select,
+    .modal-body textarea {
+        width: 100%;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+        box-sizing: border-box;
+    }
+
+    .modal-body input:focus,
+    .modal-body select:focus,
+    .modal-body textarea:focus {
+        outline: none;
+        background-color: #fff;
+    }
+
+    .modal-body input::placeholder {
+        color: #6c757d;
+        opacity: 0.7;
+    }
+
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    .btn-primary {
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #dc3545;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .helptext {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .product-info h6 {
+        margin-bottom: 0.5rem;
+    }
+
+    .loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Стили для поиска товаров (только для форм с продуктами) */
+    .search-container {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .modal-body .search-input {
+        padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .modal-body .search-input:focus {
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.2rem;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .product-select-container {
+        position: relative;
+    }
+
+    .product-select {
+        width: 100%;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .product-select:focus {
+        outline: none;
+    }
+
+    .product-option {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .product-option:hover {
+        background-color: #f8f9fa;
+    }
+
+    .product-option:last-child {
+        border-bottom: none;
+    }
+
+    .product-info-small {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .no-results {
+        padding: 1.5rem;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="modal-background">
+    <div class="modal-container">
+        <!-- Добавляем класс темы -->
+        <div class="modal-content theme-{{ theme|default:'blue' }}">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% if form.instance.pk %}
+                        <i class="bi bi-pencil-square me-2"></i>Редактировать {{ title }}
+                    {% else %}
+                        <i class="bi bi-plus-circle me-2"></i>{{ title }}
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" onclick="window.history.back()"></button>
+            </div>
+
+            <form method="post" id="batchForm">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Информация о товаре для редактирования -->
+                    {% if form.instance.pk and form.instance.product %}
+                    <div class="product-info">
+                        <h6>Товар: {{ form.instance.product.name }}</h6>
+                        <p class="mb-0 text-muted">
+                            Категория: {{ form.instance.product.category.name }}<br>
+                            Поставщик: {{ form.instance.product.supplier.name }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Ручной рендеринг полей -->
+                    {% for field in form %}
+                    <div class="form-group mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                        {% if field.name == 'product' and not form.instance.pk %}
+                        <!-- Кастомный селектор с поиском только для создания -->
+                        <div class="product-select-container">
+                            <div class="search-container">
+                                <i class="bi bi-search search-icon"></i>
+                                <input type="text"
+                                       class="search-input"
+                                       placeholder="Поиск товара..."
+                                       id="productSearch">
+                            </div>
+
+                            <div class="product-select" id="productOptions">
+                                {% for product in all_products %}
+                                <div class="product-option"
+                                     data-value="{{ product.id }}"
+                                     onclick="selectProduct(this)">
+                                    <strong>{{ product.name }}</strong>
+                                    <div class="product-info-small">
+                                        Категория: {{ product.category.name }} |
+                                        Поставщик: {{ product.supplier.name }}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="no-results">Нет доступных товаров</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Скрытое поле для хранения выбранного значения -->
+                            <input type="hidden"
+                                   name="product"
+                                   id="selectedProduct"
+                                   value="{{ form.product.value|default:'' }}">
+
+                            {% if field.errors %}
+                            <div class="errorlist">
+                                {% for error in field.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% else %}
+                        <!-- Стандартное поле для редактирования и других полей -->
+                        {{ field }}
+
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% if field.errors %}
+                        <div class="errorlist">
+                            {% for error in field.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="bi bi-x-circle me-1"></i>Отмена
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        {% if form.instance.pk %}
+                            <i class="bi bi-check-circle me-1"></i>Обновить
+                        {% else %}
+                            <i class="bi bi-check-circle me-1"></i>{{ action }}
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+// Обработчик отправки формы
+document.getElementById('batchForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    {% if form.instance.pk %}
+    submitBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i>Обновление...';
+    {% else %}
+    submitBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i>Создание...';
+    {% endif %}
+});
+
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        window.history.back();
+    }
+});
+
+// Закрытие по клику вне модального окна
+document.querySelector('.modal-background').addEventListener('click', function(e) {
+    if (e.target === this) {
+        window.history.back();
+    }
+});
+
+// Функции для поиска товаров (только если есть поле поиска)
+function initializeProductSearch() {
+    const searchInput = document.getElementById('productSearch');
+    const productOptions = document.getElementById('productOptions');
+
+    if (!searchInput || !productOptions) return;
+
+    const options = productOptions.querySelectorAll('.product-option');
+
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        let hasVisibleOptions = false;
+
+        options.forEach(option => {
+            const productName = option.querySelector('strong').textContent.toLowerCase();
+            const productInfo = option.querySelector('.product-info-small').textContent.toLowerCase();
+
+            if (productName.includes(searchTerm) || productInfo.includes(searchTerm)) {
+                option.style.display = 'block';
+                hasVisibleOptions = true;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Показать/скрыть сообщение о отсутствии результатов
+        const noResults = productOptions.querySelector('.no-results');
+        if (!hasVisibleOptions) {
+            if (!noResults) {
+                const noResultsElement = document.createElement('div');
+                noResultsElement.className = 'no-results';
+                noResultsElement.textContent = 'Товары не найдены';
+                productOptions.appendChild(noResultsElement);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
+    });
+
+    // Фокус на поиск при открытии
+    searchInput.focus();
+
+    // Обработчик Enter в поле поиска
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            // Выбираем первый видимый вариант
+            const firstVisible = Array.from(options).find(opt =>
+                opt.style.display !== 'none' && !opt.classList.contains('no-results')
+            );
+            if (firstVisible) {
+                selectProduct(firstVisible);
+            }
+        }
+    });
+}
+
+function selectProduct(element) {
+    if (element.classList.contains('no-results')) return;
+
+    const productId = element.getAttribute('data-value');
+    const productName = element.querySelector('strong').textContent;
+
+    // Устанавливаем значение в скрытое поле
+    document.getElementById('selectedProduct').value = productId;
+
+    // Подсвечиваем выбранный элемент
+    const options = document.querySelectorAll('.product-option');
+    options.forEach(opt => {
+        opt.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+
+    // Показываем выбранный товар в поле поиска
+    document.getElementById('productSearch').value = productName;
+
+    // Прокручиваем к выбранному элементу
+    element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Валидация формы (только для форм с продуктами)
+function validateForm() {
+    const selectedProduct = document.getElementById('selectedProduct');
+    if (selectedProduct && !selectedProduct.value) {
+        alert('Пожалуйста, выберите товар');
+        return false;
+    }
+    return true;
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализируем поиск только если есть поле поиска
+    const searchInput = document.getElementById('productSearch');
+    if (searchInput) {
+        initializeProductSearch();
+
+        // Если есть выбранный товар (при ошибке валидации)
+        const selectedProductId = document.getElementById('selectedProduct').value;
+        if (selectedProductId) {
+            const selectedOption = document.querySelector(`.product-option[data-value="${selectedProductId}"]`);
+            if (selectedOption) {
+                selectProduct(selectedOption);
+            }
+        }
+
+        // Добавляем валидацию к форме
+        const form = document.getElementById('batchForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

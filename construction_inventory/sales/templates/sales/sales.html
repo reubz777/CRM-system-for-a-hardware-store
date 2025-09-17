@@ -1,0 +1,131 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">История продаж</h1>
+    <a href="{% url 'sales:create-sale' %}" class="btn btn-primary d-flex align-items-center">
+        <i class="bi bi-plus-circle me-2"></i> Провести продажу
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <i class="bi bi-cart-check"></i>
+            <h2>{{ sales_count }} </h2>
+            <p>Продаж за все время</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <i class="bi bi-currency-dollar"></i>
+            <h2>{{ total_revenue }} BYN </h2>
+            <p>Общая выручка</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <i class="bi bi-cart-plus"></i>
+            <h2>{{ avg_revenue }} BYN</h2>
+            <p>Средний чек</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <i class="bi bi-graph-up"></i>
+            <h2> {{ growth_percentage }}% </h2>
+            <p>Рост продаж</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Список продаж</h5>
+        <form method="get" class="d-flex align-items-center">
+            <input type="date" class="form-control form-control-sm me-2" name="start_date"
+                   value="{{ current_start_date }}" style="width: 140px;">
+            <input type="date" class="form-control form-control-sm me-2" name="end_date"
+                   value="{{ current_end_date }}" style="width: 140px;">
+            <div class="search-form me-2 position-relative" style="width: 200px;">
+                <i class="bi bi-search position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); z-index: 10; color: #6c757d;"></i>
+                <input type="text" class="form-control form-control-sm ps-4" name="search"
+                       value="{{ current_search }}" placeholder="  Поиск продаж...">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm me-2" style="min-width: 80px;">
+                <i class="bi bi-search me-1"></i>Найти
+            </button>
+            <a href="?" class="btn btn-outline-secondary btn-sm" style="min-width: 80px;">
+                <i class="bi bi-x-circle me-1"></i>Сбросить
+            </a>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID продажи</th>
+                        <th>Дата</th>
+                        <th>Товар</th>
+                        <th>Количество</th>
+                        <th>Цена</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if sales %}
+                        {% for sale in sales %}
+                            <tr>
+                                <td>{{ sale.id }}</td>
+                                <td>{{ sale.formatted_date }}</td>
+                                <td>{{ sale.batch.product.name }}</td>
+                                <td>{{ sale.quantity }} шт.</td>
+                                <td>{{ sale.batch.price }} BYN</td>
+                                <td><strong>{{ sale.total_price }} BYN</strong></td>
+                                <td><span class="badge bg-success">Завершено</span></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="bi bi-cart-x fs-1 text-muted d-block mb-3"></i>
+                                    <h5 class="text-muted">Продажи не найдены</h5>
+                                    <p class="text-muted mb-4">По вашему запросу не найдено ни одной продажи</p>
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            Попробуйте изменить параметры поиска или
+                                            <a href="?" class="text-decoration-none">сбросить фильтры</a>
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.empty-state {
+    padding: 2rem 0;
+}
+.empty-state i {
+    font-size: 4rem;
+    opacity: 0.5;
+}
+.empty-state .btn {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    line-height: 1.5;
+}
+</style>
+
+<script>
+</script>
+
+{% endblock %}

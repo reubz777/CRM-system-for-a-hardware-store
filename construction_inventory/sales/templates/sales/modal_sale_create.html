@@ -1,0 +1,414 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="modal-background" id="saleModalBackground">
+    <div class="modal-container">
+        <div class="modal-content">
+            <form method="post" action="{% url 'sales:create-sale' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Новая продажа</h5>
+                    <a href="{% url 'sales:sales-list' %}" class="btn-close text-decoration-none">&times;</a>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Поле товара с поиском -->
+                    <div class="mb-3">
+                        <label for="{{ form.batch.id_for_label }}" class="form-label">
+                            {{ form.batch.label }} <span class="text-danger">*</span>
+                        </label>
+                        
+                        <!-- Кастомный селектор с поиском -->
+                        <div class="product-select-container">
+                            <div class="search-container">
+                                <i class="bi bi-search search-icon"></i>
+                                <input type="text"
+                                       class="search-input"
+                                       placeholder="Поиск товара..."
+                                       id="productSearch">
+                            </div>
+
+                            <div class="product-select" id="productOptions">
+                                {% for batch in all_products %}
+                                <div class="product-option"
+                                     data-value="{{ batch.id }}"
+                                     onclick="selectProduct(this)">
+                                    <strong>{{ batch.product.name }} - Цена: {{ batch.price }} BYN</strong>
+                                    <div class="product-info-small">
+                                        Категория: {{ batch.product.category.name }} |
+                                        Поставщик: {{ batch.product.supplier.name }} |
+                                        В наличии: {{ batch.quantity }} шт.
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="no-results">Нет доступных товаров</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Скрытое поле для хранения выбранного значения -->
+                            <input type="hidden"
+                                   name="batch"
+                                   id="selectedProduct"
+                                   value="{{ form.batch.value|default:'' }}">
+
+                            {% if form.batch.errors %}
+                            <div class="errorlist">
+                                {% for error in form.batch.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if form.batch.help_text %}
+                        <div class="form-text">{{ form.batch.help_text }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Остальные поля -->
+                    <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                            {{ form.quantity.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.quantity }}
+                        {% if form.quantity.help_text %}
+                        <div class="form-text">{{ form.quantity.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.quantity.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.sale_date.id_for_label }}" class="form-label">
+                            {{ form.sale_date.label }} <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            {{ form.sale_date }}
+                        </div>
+                        {% if form.sale_date.help_text %}
+                        <div class="form-text">{{ form.sale_date.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.sale_date.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="{% url 'sales:sales-list' %}" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Сохранить продажу</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    /* Модальное окно */
+    .modal-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1060;
+    }
+
+    .modal-container {
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #dee2e6;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Стили для кастомного селектора товаров */
+    .search-container {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3b7ddd;
+        box-shadow: 0 0 0 0.2rem rgba(59, 125, 221, 0.25);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.2rem;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .product-select-container {
+        position: relative;
+    }
+
+    .product-select {
+        width: 100%;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .product-option {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .product-option:hover {
+        background-color: #f8f9fa;
+    }
+
+    .product-option.selected {
+        background-color: #e3f2fd;
+        border-left: 4px solid #3b7ddd;
+    }
+
+    .product-option:last-child {
+        border-bottom: none;
+    }
+
+    .product-info-small {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .no-results {
+        padding: 1.5rem;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        background-color: #f8f9fa;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #dc3545;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация поиска товаров
+        initializeProductSearch();
+
+        // Фокус на поле даты при клике на иконку
+        const dateIcon = document.querySelector('.input-group-text');
+        const dateInput = document.querySelector('input[type="datetime-local"]');
+
+        if (dateIcon && dateInput) {
+            dateIcon.addEventListener('click', function() {
+                dateInput.focus();
+                if (dateInput.showPicker) {
+                    dateInput.showPicker();
+                }
+            });
+        }
+
+        // Автофокус на поле поиска при открытии модалки
+        setTimeout(function() {
+            const searchInput = document.getElementById('productSearch');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }, 300);
+    });
+
+    // Функции для поиска товаров
+    function initializeProductSearch() {
+        const searchInput = document.getElementById('productSearch');
+        const productOptions = document.getElementById('productOptions');
+
+        if (!searchInput || !productOptions) return;
+
+        const options = productOptions.querySelectorAll('.product-option');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            let hasVisibleOptions = false;
+
+            options.forEach(option => {
+                const productText = option.querySelector('strong').textContent.toLowerCase();
+                const productInfo = option.querySelector('.product-info-small').textContent.toLowerCase();
+
+                if (productText.includes(searchTerm) || productInfo.includes(searchTerm)) {
+                    option.style.display = 'block';
+                    hasVisibleOptions = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            // Показать/скрыть сообщение о отсутствии результатов
+            const noResults = productOptions.querySelector('.no-results');
+            if (!hasVisibleOptions) {
+                if (!noResults) {
+                    const noResultsElement = document.createElement('div');
+                    noResultsElement.className = 'no-results';
+                    noResultsElement.textContent = 'Товары не найдены';
+                    productOptions.appendChild(noResultsElement);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        });
+
+        // Обработчик Enter в поле поиска
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // Выбираем первый видимый вариант
+                const firstVisible = Array.from(options).find(opt =>
+                    opt.style.display !== 'none' && !opt.classList.contains('no-results')
+                );
+                if (firstVisible) {
+                    selectProduct(firstVisible);
+                }
+            }
+        });
+    }
+
+    function selectProduct(element) {
+        if (element.classList.contains('no-results')) return;
+
+        const productId = element.getAttribute('data-value');
+        const productText = element.querySelector('strong').textContent;
+
+        // Устанавливаем значение в скрытое поле
+        document.getElementById('selectedProduct').value = productId;
+
+        // Подсвечиваем выбранный элемент
+        const options = document.querySelectorAll('.product-option');
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+        });
+
+        element.classList.add('selected');
+
+        // Показываем выбранный товар в поле поиска
+        document.getElementById('productSearch').value = productText;
+
+        // Прокручиваем к выбранному элементу
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Валидация формы
+    function validateForm() {
+        const selectedProduct = document.getElementById('selectedProduct');
+        if (selectedProduct && !selectedProduct.value) {
+            alert('Пожалуйста, выберите товар');
+            return false;
+        }
+        return true;
+    }
+
+    // Добавляем валидацию к форме
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+
+    // Закрытие модального окна при клике вне формы
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalBackground = document.getElementById('saleModalBackground');
+        const modalContent = document.querySelector('.modal-content');
+        
+        if (modalBackground && modalContent) {
+            modalBackground.addEventListener('click', function(e) {
+                // Закрываем только если клик был по фону, а не по содержимому модального окна
+                if (e.target === modalBackground) {
+                    window.location.href = "{% url 'sales:sales-list' %}";
+                }
+            });
+        }
+    });
+
+    // Закрытие модального окна по клавише Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.location.href = "{% url 'sales:sales-list' %}";
+        }
+    });
+</script>
+{% endblock %}
