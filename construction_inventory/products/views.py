@@ -45,19 +45,13 @@ class ProductDetail(LoginRequiredMixin, DetailView):
         batches = context['product'].batches.all()
         context['batches'] = batches
 
-        # Подсчёт активных партий
-        active_batches = [batch for batch in batches if batch.quantity > 0]
-        context['active_batches'] = active_batches
-        context['active_batches_count'] = len(active_batches)
-
-        # Первичные состояния историй по всем партиям товара
+        # ервичные состояния историй по всем партиям товара
         initial_histories = []
         for batch in batches:
             initial = batch.history.order_by('history_date').first()
             if initial:
                 initial_histories.append(initial)
         context['initial_histories'] = initial_histories
-        context['initial_histories_count'] = len(initial_histories)
         return context
 
 class CreateProduct(LoginRequiredMixin, CreateView):
@@ -254,5 +248,5 @@ class AnalyticsView(LoginRequiredMixin, TemplateView):
             'growth_percentage': round(growth_percentage, 1),
         }
 
-class Manual(LoginRequiredMixin, TemplateView):
+class Manual(TemplateView):
     template_name = 'products/manual_info.html'

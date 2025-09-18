@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models import Sum
 from products.models import Product
 from simple_history.models import HistoricalRecords
 
@@ -96,3 +97,8 @@ class Batch(models.Model):
         self.is_modified = True
         self.save()
         return self
+
+    @property
+    def total_price(self):
+        total = Batch.objects.aggregate(total_price = Sum('price'))
+        return total

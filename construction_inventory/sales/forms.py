@@ -1,8 +1,18 @@
 from django import forms
 from .models import Sale
 from datetime import datetime
+from warehouse.models import Batch
 
 class SaleCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Показываем только активные партии и настраиваем подписи
+        self.fields['batch'].queryset = Batch.objects.filter(quantity__gt=0).select_related(
+            'product', 'product__category', 'product__supplier'
+        ).order_by('product__name', '-arrival_date')
+        self.fields['batch'].label_from_instance = (
+            lambda b: f"{b.product.name} — {b.quantity} шт., {b.price} BYN, #{b.id}"
+        )
     class Meta:
         model = Sale
         fields = "__all__"

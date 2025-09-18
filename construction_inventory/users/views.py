@@ -8,5 +8,5 @@ class CustomLoginView(LoginView):
     template_name = 'users/registration/login.html'
     redirect_authenticated_user = True
 
-class ProfileSettings(TemplateView):
-    template_name = ''
+class ProfileSettings(LoginRequiredMixin, TemplateView):
+    template_name = 'users/profile_settings.html'

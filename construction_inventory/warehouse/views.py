@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Batch
@@ -15,6 +13,7 @@ from categories.models import Category
 from supplies.models import Supplier
 from products.models import Product
 from .models import Batch, BatchGroup
+from django.core import serializers
 from django.http import HttpResponse
 from django.utils import timezone
 import openpyxl
@@ -22,7 +21,7 @@ from openpyxl.styles import Font
 from datetime import datetime
 
 
-class BatchList(LoginRequiredMixin,ListView):
+class BatchList(ListView):
     model = Batch
     template_name = 'warehouse/products.html'
     context_object_name = 'batches'
@@ -124,7 +123,7 @@ class BatchList(LoginRequiredMixin,ListView):
         context['suppliers_list'] = suppliers_list
         return context
 
-class CreateBatch(LoginRequiredMixin, CreateView):
+class CreateBatch(CreateView):
     model = Batch
     form_class = BatchForm
     template_name = 'products/modal_form.html'
@@ -147,7 +146,7 @@ class CreateBatch(LoginRequiredMixin, CreateView):
         form.save()
         return super().form_valid(form)
 
-class DeleteBatch(LoginRequiredMixin, DeleteView):
+class DeleteBatch(DeleteView):
     model = Batch
     template_name = 'products/modal_delete.html'
     success_url = reverse_lazy('warehouse:batch-list')
@@ -176,7 +175,7 @@ class DeleteBatch(LoginRequiredMixin, DeleteView):
             return self.render_to_response(context)
 
 
-class ConsolidationBatch(LoginRequiredMixin, View):
+class ConsolidationBatch(View):
     def post(self, request, pk):
         product = get_object_or_404(Product, id=pk)
 
@@ -201,7 +200,7 @@ class ConsolidationBatch(LoginRequiredMixin, View):
             messages.warning(request, f'У товара "{product.name}" нет поставок')
         return redirect('warehouse:batch-list')
 
-class BatchUpdateInfo(LoginRequiredMixin, UpdateView):
+class BatchUpdateInfo(UpdateView):
     model = Batch
     form_class = BatchUpdate
     template_name = 'products/modal_form.html'
@@ -223,11 +222,12 @@ class BatchUpdateInfo(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'Партия успешно обновлена!')
         return super().form_valid(form)
 
-@login_required
 def export_xlsx(request):
     batch_list_view = BatchList()
     batch_list_view.request = request
     queryset = batch_list_view.get_queryset()
+
+    print(queryset)
 
     queryset = queryset.select_related('product', 'group')
 

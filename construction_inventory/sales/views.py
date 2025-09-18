@@ -4,7 +4,6 @@ from .models import Sale
 from django.db.models import F, Q
 from .forms import SaleCreateForm
 from django.urls import reverse_lazy
-from warehouse.models import Batch
 
 class SaleList(LoginRequiredMixin, ListView):
     model = Sale
@@ -49,12 +48,7 @@ class SaleCreate(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Передаем только партии с quantity > 0
-        context['all_products'] = Batch.objects.filter(
-            quantity__gt=0
-        ).select_related('product__category', 'product__supplier').order_by('product__name')
+        # Всё, что нужно для кастомного селектора, есть в form.batch.queryset
+        context['all_products'] = self.get_form().fields['batch'].queryset
         return context
-
-
-
 

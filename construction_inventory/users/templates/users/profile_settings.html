@@ -3,506 +3,179 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title">Настройки системы</h1>
-    <div class="d-flex align-items-center">
-        <span class="badge bg-primary me-2">
-            <i class="bi bi-shield-check me-1"></i>Суперпользователь
-            {% else %}
-                <i class="bi bi-person-check me-1"></i>Менеджер
-            {% endif %}
-        </span>
-    </div>
-</div>
+    <h1 class="page-title">Настройки</h1>
+    <span class="badge bg-primary">
+        {% if user.is_superuser %}<i class="bi bi-shield-lock me-1"></i>Суперпользователь{% else %}<i class="bi bi-person me-1"></i>Менеджер{% endif %}
+    </span>
+    {% if user.is_superuser %}
+    <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#addManagerModal">
+        <i class="bi bi-person-plus me-1"></i>Добавить менеджера
+    </button>
+    {% endif %}
+  </div>
 
 <div class="row">
-    <!-- Настройки темы -->
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <i class="bi bi-palette me-2"></i>
-                <h5 class="mb-0">Настройки темы</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">Выберите тему интерфейса:</label>
-                    <div class="theme-options">
-                        <div class="theme-option" data-theme="light">
-                            <div class="theme-preview light-theme">
-                                <div class="preview-header"></div>
-                                <div class="preview-sidebar"></div>
-                                <div class="preview-content"></div>
-                            </div>
-                            <span>Светлая тема</span>
-                        </div>
-                        <div class="theme-option" data-theme="dark">
-                            <div class="theme-preview dark-theme">
-                                <div class="preview-header"></div>
-                                <div class="preview-sidebar"></div>
-                                <div class="preview-content"></div>
-                            </div>
-                            <span>Тёмная тема</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Тема будет применена ко всему интерфейсу</small>
-                    <button type="button" class="btn btn-primary btn-sm" id="applyTheme">
-                        <i class="bi bi-check-lg me-1"></i>Применить
-                    </button>
-                </div>
-            </div>
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex align-items-center"><i class="bi bi-palette me-2"></i><h5 class="mb-0">Тема интерфейса</h5></div>
+      <div class="card-body">
+        <div class="d-flex gap-3 mb-3">
+          <button type="button" class="btn btn-outline-secondary theme-btn" data-theme="light">
+            <i class="bi bi-brightness-high me-1"></i>Светлая
+          </button>
+          <button type="button" class="btn btn-outline-secondary theme-btn" data-theme="dark">
+            <i class="bi bi-moon me-1"></i>Тёмная
+          </button>
         </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">Сохраняется в браузере (LocalStorage)</small>
+          <button type="button" id="applyTheme" class="btn btn-primary btn-sm"><i class="bi bi-check2 me-1"></i>Применить</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Настройки уведомлений -->
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <i class="bi bi-bell me-2"></i>
-                <h5 class="mb-0">Уведомления</h5>
-            </div>
-            <div class="card-body">
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
-                    <label class="form-check-label" for="emailNotifications">
-                        Email уведомления
-                    </label>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="lowStockAlerts" checked>
-                    <label class="form-check-label" for="lowStockAlerts">
-                        Уведомления о низких остатках
-                    </label>
-                </div>
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="salesReports">
-                    <label class="form-check-label" for="salesReports">
-                        Еженедельные отчёты о продажах
-                    </label>
-                </div>
-                <button type="button" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-gear me-1"></i>Настроить уведомления
-                </button>
-            </div>
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex align-items-center"><i class="bi bi-bell me-2"></i><h5 class="mb-0">Уведомления</h5></div>
+      <div class="card-body">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+          <label class="form-check-label" for="emailNotifications">Email уведомления</label>
         </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="lowStockAlerts" checked>
+          <label class="form-check-label" for="lowStockAlerts">О низких остатках</label>
+        </div>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="weeklyReports">
+          <label class="form-check-label" for="weeklyReports">Еженедельные отчёты</label>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 {% if user.is_superuser %}
-<!-- Управление пользователями (только для суперпользователя) -->
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-people me-2"></i>
-                    <h5 class="mb-0">Управление пользователями</h5>
-                </div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addManagerModal">
-                    <i class="bi bi-person-plus me-1"></i>Добавить менеджера
-                </button>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Пользователь</th>
-                                <th>Роль</th>
-                                <th>Статус</th>
-                                <th>Последний вход</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            {{ user.first_name|first|default:user.username|first|upper }}
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
-                                            <small class="text-muted">{{ user.email }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-shield-check me-1"></i>Суперпользователь
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle me-1"></i>Активен
-                                    </span>
-                                </td>
-                                <td>{{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm me-1" title="Редактировать">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" title="Заблокировать" disabled>
-                                        <i class="bi bi-lock"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <!-- Здесь будут отображаться менеджеры -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div class="card">
+  <div class="card-header d-flex align-items-center"><i class="bi bi-people me-2"></i><h5 class="mb-0">Пользователи</h5></div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Имя</th><th>Роль</th><th>Email</th><th>Последний вход</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ user.get_full_name|default:user.username }}</td>
+            <td><span class="badge bg-danger">Суперпользователь</span></td>
+            <td>{{ user.email|default:"—" }}</td>
+            <td>{{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-</div>
+  </div>
+}</div>
 {% endif %}
 
-<!-- Модальное окно добавления менеджера -->
+<!-- Modal: Добавить менеджера -->
 {% if user.is_superuser %}
-<div class="modal fade" id="addManagerModal" tabindex="-1" aria-labelledby="addManagerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addManagerModalLabel">
-                    <i class="bi bi-person-plus me-2"></i>Добавить менеджера
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addManagerForm">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="managerFirstName" class="form-label">Имя <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="managerFirstName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="managerLastName" class="form-label">Фамилия <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="managerLastName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="managerEmail" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="managerEmail" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="managerUsername" class="form-label">Имя пользователя <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="managerUsername" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="managerPassword" class="form-label">Пароль <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="managerPassword" required>
-                        <div class="form-text">Минимум 8 символов</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="managerPermissions" class="form-label">Разрешения</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="canViewProducts" checked>
-                            <label class="form-check-label" for="canViewProducts">
-                                Просмотр товаров
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="canEditProducts">
-                            <label class="form-check-label" for="canEditProducts">
-                                Редактирование товаров
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="canViewSales" checked>
-                            <label class="form-check-label" for="canViewSales">
-                                Просмотр продаж
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="canMakeSales" checked>
-                            <label class="form-check-label" for="canMakeSales">
-                                Проведение продаж
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="canViewAnalytics">
-                            <label class="form-check-label" for="canViewAnalytics">
-                                Просмотр аналитики
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-person-plus me-1"></i>Создать менеджера
-                    </button>
-                </div>
-            </form>
+<div class="modal fade" id="addManagerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Добавить менеджера</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="addManagerForm">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Имя</label><input type="text" class="form-control" id="mFirstName" required></div>
+          <div class="mb-3"><label class="form-label">Фамилия</label><input type="text" class="form-control" id="mLastName" required></div>
+          <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="mEmail" required></div>
+          <div class="mb-3"><label class="form-label">Имя пользователя</label><input type="text" class="form-control" id="mUsername" required></div>
+          <div class="mb-3"><label class="form-label">Пароль</label><input type="password" class="form-control" id="mPassword" minlength="8" required></div>
+          <div class="mb-2"><label class="form-label">Разрешения</label>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="permViewProducts" checked><label class="form-check-label" for="permViewProducts">Просмотр товаров</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="permEditProducts"><label class="form-check-label" for="permEditProducts">Редактирование товаров</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="permViewSales" checked><label class="form-check-label" for="permViewSales">Просмотр продаж</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="permMakeSales" checked><label class="form-check-label" for="permMakeSales">Проведение продаж</label></div>
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Создать</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 {% endif %}
-
-<style>
-/* Стили для выбора темы */
-.theme-options {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.theme-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    padding: 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    min-width: 120px;
-}
-
-.theme-option:hover {
-    border-color: var(--primary-color);
-    background-color: #f8f9fa;
-}
-
-.theme-option.active {
-    border-color: var(--primary-color);
-    background-color: #e3f2fd;
-}
-
-.theme-preview {
-    width: 60px;
-    height: 40px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    position: relative;
-    overflow: hidden;
-}
-
-.light-theme {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-}
-
-.dark-theme {
-    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
-}
-
-.preview-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 8px;
-    background: var(--primary-color);
-}
-
-.preview-sidebar {
-    position: absolute;
-    top: 8px;
-    left: 0;
-    width: 15px;
-    bottom: 0;
-    background: rgba(0,0,0,0.1);
-}
-
-.preview-content {
-    position: absolute;
-    top: 8px;
-    left: 15px;
-    right: 0;
-    bottom: 0;
-    background: rgba(255,255,255,0.8);
-}
-
-.dark-theme .preview-content {
-    background: rgba(0,0,0,0.3);
-}
-
-/* Аватар */
-.avatar-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* Переключатели */
-.form-check-input:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .theme-options {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .theme-option {
-        flex-direction: row;
-        justify-content: flex-start;
-        min-width: auto;
-    }
-    
-    .theme-preview {
-        margin-right: 15px;
-        margin-bottom: 0;
-    }
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация темы
-    initializeTheme();
-    
-    // Обработчики для выбора темы
-    const themeOptions = document.querySelectorAll('.theme-option');
-    themeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            themeOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-        });
+  // Тема: инициализация
+  const saved = localStorage.getItem('theme') || 'light';
+  markActive(saved);
+
+  // Кнопки выбора темы
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => markActive(btn.dataset.theme));
+  });
+
+  // Применить тему
+  document.getElementById('applyTheme').addEventListener('click', () => {
+    const active = document.querySelector('.theme-btn.active')?.dataset.theme || 'light';
+    localStorage.setItem('theme', active);
+    applyTheme(active);
+    toast('Тема применена');
+  });
+
+  // Модалка менеджера (демо-обработка)
+  const form = document.getElementById('addManagerForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      toast('Менеджер создан (демо)');
+      const modalEl = document.getElementById('addManagerModal');
+      bootstrap.Modal.getInstance(modalEl)?.hide();
+      form.reset();
     });
-    
-    // Применение темы
-    document.getElementById('applyTheme').addEventListener('click', function() {
-        const activeTheme = document.querySelector('.theme-option.active');
-        if (activeTheme) {
-            const theme = activeTheme.dataset.theme;
-            applyTheme(theme);
-            showNotification('Тема успешно применена!', 'success');
-        }
-    });
-    
-    // Обработчик формы добавления менеджера
-    const addManagerForm = document.getElementById('addManagerForm');
-    if (addManagerForm) {
-        addManagerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Здесь будет логика создания менеджера
-            showNotification('Менеджер успешно создан!', 'success');
-            bootstrap.Modal.getInstance(document.getElementById('addManagerModal')).hide();
-            addManagerForm.reset();
-        });
-    }
+  }
+
+  // Автоприменение сохранённой темы
+  applyTheme(saved);
 });
 
-function initializeTheme() {
-    // Загружаем сохранённую тему или устанавливаем светлую по умолчанию
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    const themeOption = document.querySelector(`[data-theme="${savedTheme}"]`);
-    if (themeOption) {
-        themeOption.classList.add('active');
-    }
+function markActive(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.theme-btn[data-theme="${theme}"]`);
+  if (btn) btn.classList.add('active');
 }
 
 function applyTheme(theme) {
-    // Сохраняем выбор темы
-    localStorage.setItem('theme', theme);
-    
-    // Применяем CSS переменные для темы
-    const root = document.documentElement;
-    
-    if (theme === 'dark') {
-        root.style.setProperty('--primary-color', '#4dabf7');
-        root.style.setProperty('--secondary-color', '#868e96');
-        root.style.setProperty('--success-color', '#51cf66');
-        root.style.setProperty('--warning-color', '#ffd43b');
-        root.style.setProperty('--danger-color', '#ff6b6b');
-        root.style.setProperty('--dark-color', '#212529');
-        root.style.setProperty('--light-color', '#343a40');
-        
-        // Применяем тёмные стили
-        document.body.classList.add('dark-theme');
-    } else {
-        // Сбрасываем на светлую тему
-        root.style.setProperty('--primary-color', '#3b7ddd');
-        root.style.setProperty('--secondary-color', '#6c757d');
-        root.style.setProperty('--success-color', '#1cbb8c');
-        root.style.setProperty('--warning-color', '#f7b84b');
-        root.style.setProperty('--danger-color', '#f06548');
-        root.style.setProperty('--dark-color', '#343a40');
-        root.style.setProperty('--light-color', '#f8f9fa');
-        
-        document.body.classList.remove('dark-theme');
-    }
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    root.style.setProperty('--primary-color', '#4dabf7');
+    root.style.setProperty('--secondary-color', '#868e96');
+    document.body.classList.add('dark-theme');
+  } else {
+    root.style.setProperty('--primary-color', '#3b7ddd');
+    root.style.setProperty('--secondary-color', '#6c757d');
+    document.body.classList.remove('dark-theme');
+  }
 }
 
-function showNotification(message, type = 'info') {
-    // Создаём уведомление
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Автоматически скрываем через 3 секунды
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 3000);
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'alert alert-success position-fixed top-0 end-0 m-3';
+  el.style.zIndex = 1080;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
 }
 </script>
-
-<!-- Дополнительные стили для тёмной темы -->
-<style>
-.dark-theme {
-    background-color: #1a1a1a !important;
-    color: #e9ecef !important;
-}
-
-.dark-theme .card {
-    background-color: #2d3748 !important;
-    border-color: #4a5568 !important;
-    color: #e9ecef !important;
-}
-
-.dark-theme .card-header {
-    background-color: #4a5568 !important;
-    border-bottom-color: #718096 !important;
-    color: #e9ecef !important;
-}
-
-.dark-theme .table {
-    color: #e9ecef !important;
-}
-
-.dark-theme .table-light {
-    background-color: #4a5568 !important;
-}
-
-.dark-theme .form-control,
-.dark-theme .form-select {
-    background-color: #4a5568 !important;
-    border-color: #718096 !important;
-    color: #e9ecef !important;
-}
-
-.dark-theme .form-control:focus,
-.dark-theme .form-select:focus {
-    background-color: #4a5568 !important;
-    border-color: var(--primary-color) !important;
-    color: #e9ecef !important;
-    box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.25) !important;
-}
-
-.dark-theme .modal-content {
-    background-color: #2d3748 !important;
-    color: #e9ecef !important;
-}
-
-.dark-theme .modal-header {
-    border-bottom-color: #4a5568 !important;
-}
-
-.dark-theme .modal-footer {
-    border-top-color: #4a5568 !important;
-}
-</style>
-
 {% endblock %}
 
